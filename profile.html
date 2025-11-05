@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profile - Moodbook</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Moodbook</h1>
+            <nav>
+                <div class="nav-links">
+                    <a href="home.html">Home</a>
+                    <a href="create_post.html">What's in your mind</a>
+                </div>
+                <a href="#" class="add-product-btn" onclick="logout()">Logout</a>
+            </nav>
+        </header>
+
+        <div class="hero">
+            <h2>Your Profile</h2>
+            <p>View all your posts and activity.</p>
+        </div>
+
+        <div class="summary">
+            <div class="card">
+                <h2>Your Posts</h2>
+                <div class="product-list" id="feed">
+                    <!-- User posts will be loaded dynamically -->
+                </div>
+            </div>
+        </div>
+
+
+    </div>
+
+    <footer>
+        <p>&copy; 2023 Moodbook. All rights reserved.</p>
+    </footer>
+
+    <script src="script.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            loadUserPosts();
+        });
+
+        function loadUserPosts() {
+            fetch('/api/profile', {
+                method: 'GET',
+                credentials: 'include'
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    displayPosts(data.posts, true);
+                } else {
+                    console.error('Failed to load user posts:', data.message);
+                    if (data.message === 'Authentication required') {
+                        window.location.href = 'login.html';
+                    }
+                }
+            })
+            .catch(error => {
+                console.error('Error loading user posts:', error);
+            });
+        }
+    </script>
+</body>
+</html>
