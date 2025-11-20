@@ -1,11 +1,13 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Register - Moodbook</title>
     <link rel="stylesheet" href="styles.css">
 </head>
+
 <body>
     <div class="container">
         <header>
@@ -17,17 +19,16 @@
             <p>Create an account to start sharing your mood and connecting with others.</p>
         </div>
 
-        <div class="add-item">
+        <form id="registerForm">
             <h2>Join Moodbook</h2>
-            <form id="registerForm">
-                <input type="text" id="name" name="name" placeholder="Full Name" required>
-                <input type="email" id="email" name="email" placeholder="Email" required>
-                <input type="password" id="password" name="password" placeholder="Password" required>
-                <input type="password" id="confirmPassword" name="confirmPassword" placeholder="Confirm Password" required>
-                <button type="submit" class="download-btn">Register</button>
-            </form>
-            <p>Already have an account? <a href="login.html">Login here</a></p>
-        </div>
+            <input type="text" id="name" name="name" placeholder="Full Name" required>
+            <input type="email" id="email" name="email" placeholder="Email" required>
+            <input type="password" id="password" name="password" placeholder="Password" required>
+            <input type="password" id="confirmPassword" name="confirmPassword" placeholder="Confirm Password" required>
+            <button type="submit" class="download-btn">Register</button>
+            <p style="margin-top: 15px; text-align: center;">Already have an account? <a href="login.html"
+                    style="color: var(--primary-color);">Login here</a></p>
+        </form>
     </div>
 
     <footer>
@@ -35,7 +36,7 @@
     </footer>
 
     <script>
-        document.getElementById('registerForm').addEventListener('submit', function(e) {
+        document.getElementById('registerForm').addEventListener('submit', function (e) {
             e.preventDefault();
 
             const name = document.getElementById('name').value;
@@ -60,20 +61,21 @@
                     password: password
                 })
             })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    alert('Registration successful! Please login.');
-                    window.location.href = 'login.html';
-                } else {
-                    alert('Registration failed: ' + data.message);
-                }
-            })
-            .catch(error => {
-                console.error('Error registering:', error);
-                alert('An error occurred during registration.');
-            });
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert('Registration successful! Please login.');
+                        window.location.href = 'login.html';
+                    } else {
+                        alert('Registration failed: ' + data.message);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error registering:', error);
+                    alert('An error occurred during registration.');
+                });
         });
     </script>
 </body>
+
 </html>

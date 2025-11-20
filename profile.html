@@ -1,11 +1,13 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Profile - Moodbook</title>
     <link rel="stylesheet" href="styles.css">
 </head>
+
 <body>
     <div class="container">
         <header>
@@ -13,7 +15,7 @@
             <nav>
                 <div class="nav-links">
                     <a href="home.html">Home</a>
-                    <a href="create_post.html">What's in your mind</a>
+                    <a href="create_post.html">Create Post</a>
                 </div>
                 <a href="#" class="add-product-btn" onclick="logout()">Logout</a>
             </nav>
@@ -32,8 +34,6 @@
                 </div>
             </div>
         </div>
-
-
     </div>
 
     <footer>
@@ -42,7 +42,7 @@
 
     <script src="script.js"></script>
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', function () {
             loadUserPosts();
         });
 
@@ -51,21 +51,22 @@
                 method: 'GET',
                 credentials: 'include'
             })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    displayPosts(data.posts, true);
-                } else {
-                    console.error('Failed to load user posts:', data.message);
-                    if (data.message === 'Authentication required') {
-                        window.location.href = 'login.html';
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        displayPosts(data.posts, true);
+                    } else {
+                        console.error('Failed to load user posts:', data.message);
+                        if (data.message === 'Authentication required') {
+                            window.location.href = 'login.html';
+                        }
                     }
-                }
-            })
-            .catch(error => {
-                console.error('Error loading user posts:', error);
-            });
+                })
+                .catch(error => {
+                    console.error('Error loading user posts:', error);
+                });
         }
     </script>
 </body>
+
 </html>

@@ -70,8 +70,6 @@ function createPostElement(post, showDelete = false) {
 
     const postFooter = document.createElement('div');
     postFooter.className = 'post-footer';
-    postFooter.style.display = 'flex';
-    postFooter.style.alignItems = 'center';
 
     const likeBtn = document.createElement('button');
     likeBtn.className = 'action-btn like-btn';
