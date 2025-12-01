@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Home - Moodbook</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="page-shell">
+        <header class="primary-nav">
+            <div>
+                <p class="eyebrow">Moodbook</p>
+                <h1>Good to see you again.</h1>
+            </div>
+
+            <div class="nav-actions">
+                <a href="create_post.html" class="ghost-link">Create post</a>
+                <a href="/profile" class="ghost-link">Profile</a>
+                <button class="add-product-btn" onclick="logout()">Logout</button>
+            </div>
+        </header>
+
+        <section class="home-hero container">
+            <div class="hero-copy">
+                <p class="eyebrow">Community pulse</p>
+                <h2>See how everyone is feeling today.</h2>
+                <p>Track the emotional rhythm of friends and strangers, then add your own note to the feed.</p>
+
+                <div class="hero-actions">
+                    <a href="create_post.html" class="download-btn">Share a mood</a>
+                    <a href="/profile" class="ghost-link">View your moments</a>
+                </div>
+
+                <div class="stat-grid">
+                    <div class="stat-card">
+                        <strong>1.2k</strong>
+                        <span>Posts shared this week</span>
+                    </div>
+                    <div class="stat-card">
+                        <strong>86%</strong>
+                        <span>Positive check-ins today</span>
+                    </div>
+                    <div class="stat-card">
+                        <strong>312</strong>
+                        <span>Supportive replies</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="hero-panel">
+                <h3>Today's mood mix</h3>
+                <ul class="mood-breakdown">
+                    <li><span>Grateful</span><div class="progress"><span style="width: 48%;"></span></div><strong>48%</strong></li>
+                    <li><span>Reflective</span><div class="progress"><span style="width: 32%;"></span></div><strong>32%</strong></li>
+                    <li><span>Low energy</span><div class="progress"><span style="width: 14%;"></span></div><strong>14%</strong></li>
+                    <li><span>Overwhelmed</span><div class="progress"><span style="width: 6%;"></span></div><strong>6%</strong></li>
+                </ul>
+                <p class="panel-footnote">Updated hourly from the global feed.</p>
+            </div>
+        </section>
+
+        <main class="home-feed container">
+            <div class="feed-header">
+                <div>
+                    <p class="eyebrow">Live feed</p>
+                    <h2>Recent posts</h2>
+                </div>
+                <div class="tab-list">
+                    <button class="tab active" type="button">All</button>
+                    <button class="tab" type="button">Following</button>
+                    <button class="tab" type="button">Saved</button>
+                </div>
+            </div>
+
+            <div class="card glass-panel">
+                <div class="product-list" id="feed">
+                    <!-- Posts will be loaded dynamically -->
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <footer>
+        <p>&copy; 2023 Moodbook. All rights reserved.</p>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>

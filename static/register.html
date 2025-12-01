@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register - Moodbook</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+    <header class="register-header">
+        <div class="container header-inner">
+            <div>
+                <p class="eyebrow">Moodbook</p>
+                <h1>Where every feeling finds a friend.</h1>
+            </div>
+            <a class="ghost-link" href="login.html">Back to login</a>
+        </div>
+    </header>
+
+    <main class="container">
+        <div class="register-layout">
+            <section class="register-info">
+                <span class="eyebrow">Why join</span>
+                <h2>Share your story and feel seen.</h2>
+                <p>Log moods, spark conversations, and discover a community that celebrates every emotional color.</p>
+
+                <ul class="feature-list">
+                    <li>
+                        <h3>Daily reflections</h3>
+                        <p>Capture your highs, lows, and everything between.</p>
+                    </li>
+                    <li>
+                        <h3>Supportive circles</h3>
+                        <p>Connect with people who get it—no judgment, just empathy.</p>
+                    </li>
+                    <li>
+                        <h3>Progress insights</h3>
+                        <p>Visualize trends to better understand your emotional wellbeing.</p>
+                    </li>
+                </ul>
+
+                <div class="register-highlight">
+                    <strong>9K+</strong>
+                    <span>Members sharing their journey</span>
+                </div>
+            </section>
+
+            <section class="register-card">
+                <div class="card-header">
+                    <h2>Create your account</h2>
+                    <p>It only takes a minute to get started.</p>
+                </div>
+
+                <form id="registerForm">
+                    <div class="form-row">
+                        <input type="text" id="name" name="name" placeholder="Full Name" required>
+                        <input type="email" id="email" name="email" placeholder="Email" required>
+                    </div>
+                    <div class="form-row">
+                        <input type="password" id="password" name="password" placeholder="Password" required>
+                        <input type="password" id="confirmPassword" name="confirmPassword" placeholder="Confirm Password"
+                            required>
+                    </div>
+                    <button type="submit" class="download-btn full-width">Create account</button>
+                </form>
+
+                <p class="alt-link">Already with us? <a href="login.html">Sign in</a></p>
+            </section>
+        </div>
+    </main>
+
+    <footer>
+        <p>&copy; 2023 Moodbook. All rights reserved.</p>
+    </footer>
+
+    <script>
+        document.getElementById('registerForm').addEventListener('submit', function (e) {
+            e.preventDefault();
+
+            const name = document.getElementById('name').value;
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+
+            if (password !== confirmPassword) {
+                alert('Passwords do not match');
+                return;
+            }
+
+            fetch('/register', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                credentials: 'include',
+                body: JSON.stringify({
+                    name: name,
+                    email: email,
+                    password: password
+                })
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert('Registration successful! Please login.');
+                        window.location.href = 'login.html';
+                    } else {
+                        alert('Registration failed: ' + data.message);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error registering:', error);
+                    alert('An error occurred during registration.');
+                });
+        });
+    </script>
+</body>
+
+</html>

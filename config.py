@@ -1,9 +1,9 @@
-# Database configuration
+# config.py
 DB_CONFIG = {
-    'host': '######',  # Replace with your MySQL host
-    'user': '######',  # Replace with your MySQL username
-    'password': '###########',  # Replace with your MySQL password
-    'database': 'moodbook'  # Replace with your database name
+    'host': 'localhost',      # ✅ not 'root'
+    'user': 'root',
+    'password': 'jitesh',
+    'database': 'moodbook'
 }
 
 CREATE_TABLES_SQL = [
@@ -14,7 +14,7 @@ CREATE_TABLES_SQL = [
         email VARCHAR(255) UNIQUE NOT NULL,
         password VARCHAR(255) NOT NULL,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-    );
+    ) ENGINE=InnoDB;
     """,
     """
     CREATE TABLE IF NOT EXISTS posts (
@@ -24,7 +24,7 @@ CREATE_TABLES_SQL = [
         content TEXT NOT NULL,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         FOREIGN KEY (user_id) REFERENCES registered_users(id) ON DELETE CASCADE
-    );
+    ) ENGINE=InnoDB;
     """,
     """
     CREATE TABLE IF NOT EXISTS likes (
@@ -35,7 +35,7 @@ CREATE_TABLES_SQL = [
         FOREIGN KEY (user_id) REFERENCES registered_users(id) ON DELETE CASCADE,
         FOREIGN KEY (post_id) REFERENCES posts(id) ON DELETE CASCADE,
         UNIQUE KEY unique_like (user_id, post_id)
-    );
+    ) ENGINE=InnoDB;
     """,
     """
     CREATE TABLE IF NOT EXISTS comments (
@@ -46,6 +46,6 @@ CREATE_TABLES_SQL = [
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         FOREIGN KEY (user_id) REFERENCES registered_users(id) ON DELETE CASCADE,
         FOREIGN KEY (post_id) REFERENCES posts(id) ON DELETE CASCADE
-    );
+    ) ENGINE=InnoDB;
     """
 ]

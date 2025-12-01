@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profile - Moodbook</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+    <div class="page-shell">
+        <header class="primary-nav">
+            <div>
+                <p class="eyebrow">Moodbook</p>
+                <h1>Your mood library.</h1>
+            </div>
+
+            <div class="nav-actions">
+                <a href="home.html" class="ghost-link">Home</a>
+                <a href="create_post.html" class="ghost-link">Create post</a>
+                <button class="add-product-btn" onclick="logout()">Logout</button>
+            </div>
+        </header>
+
+        <section class="profile-hero container">
+            <div class="profile-card glass-panel">
+                <div class="avatar-ring">
+                    <span id="profileInitial">MB</span>
+                </div>
+                <div>
+                    <h2 id="profileName">Your Name</h2>
+                    <p id="profileEmail" class="text-muted">you@moodbook.app</p>
+                </div>
+                <div class="profile-meta">
+                    <div>
+                        <strong id="postCount">0</strong>
+                        <span>Posts</span>
+                    </div>
+                    <div>
+                        <strong id="streakCount">7</strong>
+                        <span>Day streak</span>
+                    </div>
+                    <div>
+                        <strong id="supportCount">54</strong>
+                        <span>Reactions</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="profile-side glass-panel">
+                <h3>Weekly reflection</h3>
+                <p>"Every post feels like a snapshot of who I was that day. Seeing them together helps me notice the subtle shifts."</p>
+                <small>Prompt updates every Monday.</small>
+            </div>
+        </section>
+
+        <main class="home-feed container">
+            <div class="feed-header">
+                <div>
+                    <p class="eyebrow">Journal</p>
+                    <h2>Your posts</h2>
+                </div>
+                <a href="create_post.html" class="ghost-link">Add a new entry</a>
+            </div>
+
+            <div class="card glass-panel">
+                <div class="product-list" id="feed">
+                    <!-- User posts will be loaded dynamically -->
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <footer>
+        <p>&copy; 2023 Moodbook. All rights reserved.</p>
+    </footer>
+
+    <script src="script.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            loadUserPosts();
+        });
+
+        function loadUserPosts() {
+            fetch('/api/profile', {
+                method: 'GET',
+                credentials: 'include'
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        displayPosts(data.posts, true);
+                        updateProfileStats(data);
+                    } else {
+                        console.error('Failed to load user posts:', data.message);
+                        if (data.message === 'Authentication required') {
+                            window.location.href = 'login.html';
+                        }
+                    }
+                })
+                .catch(error => {
+                    console.error('Error loading user posts:', error);
+                });
+        }
+
+        function updateProfileStats(data) {
+            const posts = data.posts || [];
+            const user = data.user || {};
+            const stats = data.stats || {};
+            const name = user.name || 'Moodbook Member';
+            const email = user.email || 'you@moodbook.app';
+
+            document.getElementById('postCount').textContent = posts.length;
+            document.getElementById('streakCount').textContent = stats.currentStreak || stats.streak || '—';
+            document.getElementById('supportCount').textContent = stats.reactions || stats.support || '—';
+            document.getElementById('profileName').textContent = name;
+            document.getElementById('profileEmail').textContent = email;
+
+            const initials = name
+                .split(' ')
+                .filter(Boolean)
+                .map(n => n[0])
+                .join('')
+                .toUpperCase()
+                .slice(0, 2);
+
+            document.getElementById('profileInitial').textContent = initials || 'MB';
+        }
+    </script>
+</body>
+
+</html>

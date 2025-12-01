@@ -4,11 +4,48 @@ import mysql.connector
 from mysql.connector import Error
 import hashlib
 import os
+from functools import wraps
+
 from config import DB_CONFIG, CREATE_TABLES_SQL
 
 app = Flask(__name__)
-app.secret_key = os.urandom(24)  
-CORS(app, supports_credentials=True) 
+app.secret_key = os.urandom(24)
+CORS(app, supports_credentials=True)
+
+
+def init_db():
+    """
+    Create the database (if it doesn't exist) and then create all tables.
+    This runs once on startup.
+    """
+    try:
+        # Connect WITHOUT specifying database first
+        conn = mysql.connector.connect(
+            host=DB_CONFIG['host'],
+            user=DB_CONFIG['user'],
+            password=DB_CONFIG['password']
+        )
+        cursor = conn.cursor()
+
+        # Create database if needed and use it
+        cursor.execute(f"CREATE DATABASE IF NOT EXISTS {DB_CONFIG['database']}")
+        cursor.execute(f"USE {DB_CONFIG['database']}")
+
+        # Create tables
+        for sql in CREATE_TABLES_SQL:
+            cursor.execute(sql)
+
+        conn.commit()
+        print("Database and tables initialized successfully")
+    except Error as e:
+        print(f"Error during DB init: {e}")
+    finally:
+        try:
+            cursor.close()
+            conn.close()
+        except:
+            pass
+
 
 def get_db_connection():
     try:
@@ -18,37 +55,23 @@ def get_db_connection():
         print(f"Error connecting to MySQL: {e}")
         return None
 
-def create_tables_if_not_exist():
-    connection = get_db_connection()
-    if connection is None:
-        print("Failed to connect to database for table creation")
-        return
-
-    try:
-        cursor = connection.cursor()
-        for sql in CREATE_TABLES_SQL:
-            cursor.execute(sql)
-        connection.commit()
-        print("Tables created or verified successfully")
-    except Error as e:
-        print(f"Error creating tables: {e}")
-    finally:
-        if connection:
-            connection.close()
-
-# Create tables on startup
-create_tables_if_not_exist()
 
 def hash_password(password):
     return hashlib.sha256(password.encode()).hexdigest()
 
+
 def login_required(f):
+    @wraps(f)
     def wrapper(*args, **kwargs):
         if 'user_id' not in session:
             return jsonify({'success': False, 'message': 'Authentication required'}), 401
         return f(*args, **kwargs)
-    wrapper.__name__ = f.__name__
     return wrapper
+
+
+# ✅ Initialize DB (database + tables) on startup
+init_db()
+
 
 @app.route('/register', methods=['POST'])
 def register():
@@ -74,8 +97,10 @@ def register():
             return jsonify({'success': False, 'message': 'User already exists'}), 409
 
         # Insert new user
-        cursor.execute("INSERT INTO registered_users (fullname, email, password) VALUES (%s, %s, %s)",
-                       (name, email, hashed_password))
+        cursor.execute(
+            "INSERT INTO registered_users (fullname, email, password) VALUES (%s, %s, %s)",
+            (name, email, hashed_password)
+        )
         connection.commit()
         return jsonify({'success': True, 'message': 'User registered successfully'}), 201
     except Error as e:
@@ -84,6 +109,7 @@ def register():
     finally:
         if connection:
             connection.close()
+
 
 @app.route('/login', methods=['POST'])
 def login():
@@ -102,13 +128,19 @@ def login():
 
     try:
         cursor = connection.cursor()
-        cursor.execute("SELECT id, fullname FROM registered_users WHERE email = %s AND password = %s",
-                       (email, hashed_password))
+        cursor.execute(
+            "SELECT id, fullname FROM registered_users WHERE email = %s AND password = %s",
+            (email, hashed_password)
+        )
         user = cursor.fetchone()
         if user:
             session['user_id'] = user[0]
             session['user_name'] = user[1]
-            return jsonify({'success': True, 'message': 'Login successful', 'user': {'id': user[0], 'name': user[1]}}), 200
+            return jsonify({
+                'success': True,
+                'message': 'Login successful',
+                'user': {'id': user[0], 'name': user[1]}
+            }), 200
         else:
             return jsonify({'success': False, 'message': 'Invalid credentials'}), 401
     except Error as e:
@@ -118,10 +150,12 @@ def login():
         if connection:
             connection.close()
 
+
 @app.route('/logout', methods=['POST'])
 def logout():
     session.clear()
     return jsonify({'success': True, 'message': 'Logged out successfully'}), 200
+
 
 @app.route('/create_post', methods=['POST'])
 @login_required
@@ -139,8 +173,10 @@ def create_post():
 
     try:
         cursor = connection.cursor()
-        cursor.execute("INSERT INTO posts (user_id, title, content) VALUES (%s, %s, %s)",
-                       (session['user_id'], title, content))
+        cursor.execute(
+            "INSERT INTO posts (user_id, title, content) VALUES (%s, %s, %s)",
+            (session['user_id'], title, content)
+        )
         connection.commit()
         return jsonify({'success': True, 'message': 'Post created successfully'}), 201
     except Error as e:
@@ -149,6 +185,7 @@ def create_post():
     finally:
         if connection:
             connection.close()
+
 
 @app.route('/posts', methods=['GET'])
 def get_posts():
@@ -188,6 +225,7 @@ def get_posts():
         if connection:
             connection.close()
 
+
 @app.route('/like/<int:post_id>', methods=['POST'])
 @login_required
 def like_post(post_id):
@@ -198,29 +236,40 @@ def like_post(post_id):
     try:
         cursor = connection.cursor()
         # Check if like already exists
-        cursor.execute("SELECT id FROM likes WHERE user_id = %s AND post_id = %s",
-                       (session['user_id'], post_id))
+        cursor.execute(
+            "SELECT id FROM likes WHERE user_id = %s AND post_id = %s",
+            (session['user_id'], post_id)
+        )
         existing_like = cursor.fetchone()
 
         if existing_like:
             # Unlike
-            cursor.execute("DELETE FROM likes WHERE user_id = %s AND post_id = %s",
-                           (session['user_id'], post_id))
+            cursor.execute(
+                "DELETE FROM likes WHERE user_id = %s AND post_id = %s",
+                (session['user_id'], post_id)
+            )
             action = 'unliked'
         else:
             # Like
-            cursor.execute("INSERT INTO likes (user_id, post_id) VALUES (%s, %s)",
-                           (session['user_id'], post_id))
+            cursor.execute(
+                "INSERT INTO likes (user_id, post_id) VALUES (%s, %s)",
+                (session['user_id'], post_id)
+            )
             action = 'liked'
 
         connection.commit()
-        return jsonify({'success': True, 'message': f'Post {action} successfully', 'action': action}), 200
+        return jsonify({
+            'success': True,
+            'message': f'Post {action} successfully',
+            'action': action
+        }), 200
     except Error as e:
         print(f"Database error: {e}")
         return jsonify({'success': False, 'message': 'Failed to like/unlike post'}), 500
     finally:
         if connection:
             connection.close()
+
 
 @app.route('/comment', methods=['POST'])
 @login_required
@@ -238,8 +287,10 @@ def add_comment():
 
     try:
         cursor = connection.cursor()
-        cursor.execute("INSERT INTO comments (user_id, post_id, content) VALUES (%s, %s, %s)",
-                       (session['user_id'], post_id, content))
+        cursor.execute(
+            "INSERT INTO comments (user_id, post_id, content) VALUES (%s, %s, %s)",
+            (session['user_id'], post_id, content)
+        )
         connection.commit()
         return jsonify({'success': True, 'message': 'Comment added successfully'}), 201
     except Error as e:
@@ -248,6 +299,7 @@ def add_comment():
     finally:
         if connection:
             connection.close()
+
 
 @app.route('/comments/<int:post_id>', methods=['GET'])
 def get_comments(post_id):
@@ -273,6 +325,7 @@ def get_comments(post_id):
         if connection:
             connection.close()
 
+
 @app.route('/api/profile', methods=['GET'])
 @login_required
 def get_user_posts():
@@ -296,8 +349,6 @@ def get_user_posts():
         """, (session['user_id'],))
         posts = cursor.fetchall()
 
-        
-        user_likes = []
         cursor.execute("SELECT post_id FROM likes WHERE user_id = %s", (session['user_id'],))
         user_likes = [row['post_id'] for row in cursor.fetchall()]
 
@@ -312,6 +363,7 @@ def get_user_posts():
         if connection:
             connection.close()
 
+
 @app.route('/delete_post/<int:post_id>', methods=['DELETE'])
 @login_required
 def delete_post(post_id):
@@ -321,13 +373,12 @@ def delete_post(post_id):
 
     try:
         cursor = connection.cursor()
-        
+
         cursor.execute("SELECT user_id FROM posts WHERE id = %s", (post_id,))
         post = cursor.fetchone()
         if not post or post[0] != session['user_id']:
             return jsonify({'success': False, 'message': 'Unauthorized or post not found'}), 403
 
-        
         cursor.execute("DELETE FROM posts WHERE id = %s", (post_id,))
         connection.commit()
         return jsonify({'success': True, 'message': 'Post deleted successfully'}), 200
@@ -338,17 +389,21 @@ def delete_post(post_id):
         if connection:
             connection.close()
 
+
 @app.route('/')
 def index():
-    return send_from_directory('.', 'login.html')
+    return send_from_directory('static', 'login.html')
+
 
 @app.route('/<path:filename>')
 def serve_static(filename):
-    return send_from_directory('.', filename)
+    return send_from_directory('static', filename)
+
 
 @app.route('/profile')
 def profile_page():
-    return send_from_directory('.', 'profile.html')
+    return send_from_directory('static', 'profile.html')
+
 
 if __name__ == '__main__':
     app.run(debug=True)
